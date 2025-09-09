@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Công việc{% endblock %}
+
+{% block content %}
+<div
+    x-data="{
+        openAdd:false, openEdit:false, openDelete:false,
+        selectedTask:{id:'', title:'', description:'', dept_id:'', status:'pending'},
+        selectTask(task){this.selectedTask = JSON.parse(JSON.stringify(task))}
+    }"
+>
+    <h1 class="text-2xl font-bold mb-4 text-center">DANH SÁCH CÔNG VIỆC</h1>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-700 uppercase text-sm">ID</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-700 uppercase text-sm">Tên công việc</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-700 uppercase text-sm">Mô tả</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-700 uppercase text-sm">Phòng ban</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-700 uppercase text-sm">Trạng thái</th>
+                    <th class="px-6 py-3 text-center font-semibold text-gray-700 uppercase text-sm">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr class="border-t border-gray-200 hover:bg-gray-50">
+                    <td class="px-6 py-3">{{ task.id }}</td>
+                    <td class="px-6 py-3">{{ task.title }}</td>
+                    <td class="px-6 py-3">{{ task.description or '-' }}</td>
+                    <td class="px-6 py-3">{{ task.dept.name if task.dept else '-' }}</td>
+                    <td class="px-6 py-3">{{ task.status }}</td>
+                    <td class="px-6 py-3 text-center">
+                        <button
+                            @click="selectTask({id:'{{ task.id }}', title:'{{ task.title }}', description:'{{ task.description or "" }}', dept_id:'{{ task.dept_id }}', status:'{{ task.status }}'}); openEdit=true"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded mr-2">Sửa</button>
+                        <button
+                            @click="selectTask({id:'{{ task.id }}', title:'{{ task.title }}'}); openDelete=true"
+                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Xóa</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Thêm -->
+    <div class="mt-4 flex justify-end">
+        <button @click="openAdd=true" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Thêm công việc</button>
+    </div>
+
+    <!-- Popup Add -->
+    <div x-show="openAdd" x-cloak class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 class="text-xl font-bold mb-4">Thêm công việc</h2>
+            <form action="{{ url_for('task.add_task') }}" method="POST" class="space-y-4">
+                <div>
+                    <label class="block font-medium text-gray-700">Tên công việc</label>
+                    <input type="text" name="title" class="mt-1 block w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-700">Mô tả</label>
+                    <textarea name="description" class="mt-1 block w-full border rounded px-3 py-2"></textarea>
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-700">Phòng ban</label>
+                    <select name="dept_id" class="mt-1 block w-full border rounded px-3 py-2" required>
+                        <option value="">-- Chọn phòng ban --</option>
+                        {% for dept in depts %}
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" @click="openAdd=false" class="px-4 py-2 bg-gray-300 rounded">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup Edit -->
+    <div x-show="openEdit" x-cloak class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 class="text-xl font-bold mb-4">Sửa công việc</h2>
+            <form :action="`{{ url_for('task.edit_task', task_id=0) }}`.replace('0', selectedTask.id)" method="POST" class="space-y-4">
+                <div>
+                    <label class="block font-medium text-gray-700">Tên công việc</label>
+                    <input type="text" name="title" :value="selectedTask.title" class="mt-1 block w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-700">Mô tả</label>
+                    <textarea name="description" class="mt-1 block w-full border rounded px-3 py-2" x-text="selectedTask.description"></textarea>
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-700">Phòng ban</label>
+                    <select name="dept_id" :value="selectedTask.dept_id" class="mt-1 block w-full border rounded px-3 py-2">
+                        <option value="">-- Chọn phòng ban --</option>
+                        {% for dept in depts %}
+                        <option :selected="selectedTask.dept_id=='{{ dept.id }}'" value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-700">Trạng thái</label>
+                    <select name="status" :value="selectedTask.status" class="mt-1 block w-full border rounded px-3 py-2">
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" @click="openEdit=false" class="px-4 py-2 bg-gray-300 rounded">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup Delete -->
+    <div x-show="openDelete" x-cloak class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 class="text-xl font-bold mb-4 text-red-600">Xóa công việc</h2>
+            <p>Bạn có chắc chắn muốn xóa <span class="font-semibold" x-text="selectedTask.title"></span>?</p>
+            <form :action="`{{ url_for('task.delete_task', task_id=0) }}`.replace('0', selectedTask.id)" method="POST" class="mt-4 flex justify-end gap-3">
+                <button type="button" @click="openDelete=false" class="px-4 py-2 bg-gray-300 rounded">Hủy</button>
+                <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">Xóa</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/alpinejs" defer></script>
+<style>[x-cloak]{display:none !important;}</style>
+{% endblock %}

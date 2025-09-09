@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div x-data="{ openAdd: false, openEdit: false, openDelete: false, editProject: null, deleteProject: null }">
+    <h1 class="text-2xl font-bold mb-4 text-center">DANH SÁCH DỰ ÁN</h1>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left font-semibold text-sm">ID</th>
+                    <th class="px-6 py-3 text-left font-semibold text-sm">Tên dự án</th>
+                    <th class="px-6 py-3 text-left font-semibold text-sm">Owner</th>
+                    <th class="px-6 py-3 text-left font-semibold text-sm">Bộ phận</th>
+                    <th class="px-6 py-3 text-left font-semibold text-sm">Mô tả</th>
+                    <th class="px-6 py-3 text-left font-semibold text-sm">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for project in projects %}
+                <tr class="border-t border-gray-200 hover:bg-gray-50">
+                    <td class="px-6 py-3">{{ project.id }}</td>
+                    <td class="px-6 py-3">{{ project.name }}</td>
+                    <td class="px-6 py-3">{{ project.owner.email }}</td>
+                    <td class="px-6 py-3">{{ project.dept.name }}</td>
+                    <td class="px-6 py-3">{{ project.description or '-' }}</td>
+                    <td class="px-6 py-3 flex gap-2">
+                        <button @click="editProject={{ project.id }}; openEdit=true" class="px-2 py-1 bg-blue-500 text-white rounded">Sửa</button>
+                        <button @click="deleteProject={{ project.id }}; openDelete=true" class="px-2 py-1 bg-red-500 text-white rounded">Xóa</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Buttons Thêm -->
+    <div class="mt-4 flex justify-end">
+        <button @click="openAdd=true" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Thêm dự án</button>
+    </div>
+
+    <!-- Popup Thêm -->
+    <div x-show="openAdd" x-cloak class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 class="text-xl font-bold mb-4">Thêm dự án</h2>
+            <form action="{{ url_for('project.add_project') }}" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tên dự án</label>
+                    <input type="text" name="name" class="mt-1 block w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Owner</label>
+                    <select name="owner_id" class="mt-1 block w-full border rounded px-3 py-2" required>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.email }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Bộ phận</label>
+                    <select name="dept_id" class="mt-1 block w-full border rounded px-3 py-2" required>
+                        {% for dept in depts %}
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Mô tả</label>
+                    <textarea name="description" class="mt-1 block w-full border rounded px-3 py-2"></textarea>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" @click="openAdd=false" class="px-4 py-2 bg-gray-300 rounded">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup Sửa -->
+    <div x-show="openEdit" x-cloak class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 class="text-xl font-bold mb-4">Sửa dự án</h2>
+            <form :action="`/project/projects/edit/${editProject}`" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tên dự án</label>
+                    <input type="text" name="name" class="mt-1 block w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Owner</label>
+                    <select name="owner_id" class="mt-1 block w-full border rounded px-3 py-2" required>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.email }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Bộ phận</label>
+                    <select name="dept_id" class="mt-1 block w-full border rounded px-3 py-2" required>
+                        {% for dept in depts %}
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Mô tả</label>
+                    <textarea name="description" class="mt-1 block w-full border rounded px-3 py-2"></textarea>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" @click="openEdit=false" class="px-4 py-2 bg-gray-300 rounded">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup Xóa -->
+    <div x-show="openDelete" x-cloak class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/4">
+            <h2 class="text-xl font-bold mb-4">Xóa dự án</h2>
+            <p>Bạn có chắc chắn muốn xóa dự án này không?</p>
+            <div class="flex justify-end gap-3 mt-4">
+                <button type="button" @click="openDelete=false" class="px-4 py-2 bg-gray-300 rounded">Hủy</button>
+                <form :action="`/project/projects/delete/${deleteProject}`" method="POST">
+                    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alpine.js -->
+<script src="https://unpkg.com/alpinejs" defer></script>
+<style>[x-cloak]{display:none !important;}</style>
+{% endblock %}

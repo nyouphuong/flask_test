@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+   <div class="flex justify-center h-screen w-screen items-center">
+    <div class="w-full md:w-1/2 flex flex-col items-center">
+        <!-- tiêu đề -->
+        <h1 class="text-center text-2xl font-bold text-gray-600 mb-6">LOGIN</h1>
+
+        <!-- hiển thị flash message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="w-3/4 mb-4">
+              {% for category, message in messages %}
+                <div class="p-2 rounded text-sm {% if category == 'error' %}bg-red-200 text-red-800{% else %}bg-green-200 text-green-800{% endif %}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- form login -->
+        <form action="{{ url_for('auth.login') }}" method="POST" class="w-full flex flex-col items-center">
+            <!-- username/email -->
+            <div class="w-3/4 mb-6">
+                <input type="email" name="email" id="email" required placeholder="Email"
+                       class="w-full py-4 px-8 bg-slate-200 placeholder:font-semibold rounded hover:ring-1 outline-blue-500">
+            </div>
+            <!-- password -->
+            <div class="w-3/4 mb-6">
+                <input type="password" name="password" id="password" required placeholder="Password"
+                       class="w-full py-4 px-8 bg-slate-200 placeholder:font-semibold rounded hover:ring-1 outline-blue-500">
+            </div>
+            <!-- remember & forgot -->
+            <div class="w-3/4 flex flex-row justify-between mb-4">
+                <div class="flex items-center gap-x-1">
+                    <input type="checkbox" name="remember" id="remember" class="w-4 h-4">
+                    <label for="remember" class="text-sm text-slate-400">Remember me</label>
+                </div>
+                <div>
+                    <a href="#" class="text-sm text-slate-400 hover:text-blue-500">Forgot?</a>
+                </div>
+            </div>
+            <!-- submit button -->
+            <div class="w-3/4 mt-4">
+                <button type="submit" class="py-4 bg-blue-400 w-full rounded text-blue-50 font-bold hover:bg-blue-700">LOGIN</button>
+            </div>
+        </form>
+
+        <p class="mt-4 text-sm text-gray-500">
+            Don't have account? <a class="text-blue-500" href="{{ url_for('auth.register') }}">Register</a>
+        </p>
+    </div>
+   </div>
+</body>
+</html>
