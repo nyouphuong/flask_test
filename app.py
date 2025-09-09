@@ -19,7 +19,6 @@ with app.app_context():
     # db.drop_all()
     db.create_all()
 
-
 # Register Blueprints
 app.register_blueprint(auth_bp)
 app.register_blueprint(main_bp)
