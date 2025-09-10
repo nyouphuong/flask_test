@@ -9,7 +9,7 @@ def list_projects():
     projects = Project.query.all()
     users = User.query.all()
     depts = Dept.query.all()
-    return render_template('projects.html', projects=projects, users=users, depts=depts, title="Projects")
+    return render_template('projects.html', projects=projects, users=users, depts=depts, title="Projects", current_page="projects")
 
 # Add project
 @project_bp.route('/projects/add', methods=['POST'])
